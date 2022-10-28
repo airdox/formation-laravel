@@ -16,4 +16,9 @@ class Product extends Model
         'price',
         'size'
     ];
+
+    public function customers()
+    {
+        return $this->belongsToMany(Customer::class);
+    }
 }

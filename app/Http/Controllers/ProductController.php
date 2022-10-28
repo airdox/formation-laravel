@@ -14,9 +14,13 @@ class ProductController extends Controller
      *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(Product::all());
+        if($request->id && $request->customers)
+            $response = Product::find($request->id)->customers()->get();
+        else
+            $response = Product::all();
+        return response()->json($response);
     }
 
     /**

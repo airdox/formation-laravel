@@ -16,4 +16,9 @@ class Customer extends Model
         'wallet',
         'nbPurchasedProducts'
     ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
 }

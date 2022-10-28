@@ -13,9 +13,16 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() : JsonResponse
+    public function index(Request $request) : JsonResponse
     {
-        return response()->json(Customer::all());
+        if($request->name)
+            $response = Customer::where("name", $request->name)->get();
+        else if($request->id && $request->products)
+            $response = Customer::find($request->id)->products()->get();
+        else
+            $response = Customer::all();
+
+        return response()->json($response);
     }
 
     /**
@@ -36,20 +43,12 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \Illuminate\Http\Request $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request = null, int $id = null) : JsonResponse
+    public function show(int $id = null) : JsonResponse
     {
-        if($id != null)
-            $response = Customer::find($id);
-        else{
-            $response = $request->whenHas("name", function ($request){
-                return response()->Customer::where("name", "=", $request->name)->first()->limit(1)->get();
-            });
-        }
-        return response()->json($response);
+        return response()->json(Customer::find($id));
     }
 
     /**
@@ -62,11 +61,16 @@ class CustomerController extends Controller
     public function update(Request $request, int $id) : JsonResponse
     {
         $customer = Customer::find($id);
-        $update = $customer->update([
+        if($request->product_attach)
+            $update = $customer->products()->attach($request->product_attach);
+        else if ($request->product_detach)
+            $update = $customer->products()->detach($request->product_detach);
+        else
+            $update = $customer->update([
             "name" => $request->name,
             "wallet" => $request->wallet,
             "nbPurchasedProducts" => $request->nbPurchasedProducts
-        ]);
+            ]);
         return response()->json($update);
     }
 
